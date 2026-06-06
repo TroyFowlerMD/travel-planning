@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev ../../wrangler.toml --local",
-            "deploy": "wrangler deploy --config ../../wrangler.toml",
+    "deploy": "wrangler deploy --config ../../wrangler.toml",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240925.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "wrangler": "4.64.0"
   }
 }
