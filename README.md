@@ -95,6 +95,12 @@ npm run dev:web
 
 The dashboard opens at `http://localhost:3000`, and the Worker exposes health and fare APIs at `http://localhost:8787/health` and `http://localhost:8787/api/fare-snapshots`.
 
+The web dashboard fetches fare snapshots from `NEXT_PUBLIC_WORKER_URL`, which defaults in code to `https://travel-planning-worker.troyfowlermd.workers.dev`. Set it in `apps/web/.env.local` when you want the dashboard to read from a different Worker:
+
+```bash
+NEXT_PUBLIC_WORKER_URL=http://localhost:8787
+```
+
 ## Deploy the Worker
 
 Deploy the Worker and cron trigger:
@@ -115,7 +121,8 @@ The Worker cron is configured as `0 11 * * *`, so it refreshes fare snapshots da
 6. Set the production branch to `main`.
 7. Use `npm run build -w @travel-planning/web` as the build command.
 8. Use `apps/web/out` as the build output directory.
-9. Add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` as GitHub repository secrets for the included deployment workflow.
+9. Optionally set `NEXT_PUBLIC_WORKER_URL` to override the default deployed Worker endpoint.
+10. Add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` as GitHub repository secrets for the included deployment workflow.
 
 The included GitHub Actions workflow installs dependencies, typechecks the monorepo, builds the exported dashboard, applies the D1 schema, deploys the Worker, and publishes the Pages output on every push to `main`.
 

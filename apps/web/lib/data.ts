@@ -4,7 +4,7 @@ export type FareSnapshot = {
   origin: string;
   destination: string;
   departDate: string;
-  returnDate: string;
+  returnDate: string | null;
   price: number;
   currency: string;
   airline: string;
@@ -26,109 +26,122 @@ export type Alert = {
   severity: "deal" | "watch" | "urgent";
 };
 
-export const fareSnapshots: FareSnapshot[] = [
+export type PriceTrendPoint = {
+  date: string;
+  [routeKey: string]: string | number;
+};
+
+export type PriceTrendSeries = {
+  key: string;
+  route: string;
+  color: string;
+};
+
+export const DEFAULT_WORKER_URL = "https://travel-planning-worker.troyfowlermd.workers.dev";
+
+type FallbackRoute = {
+  route: string;
+  origin: string;
+  destination: string;
+  departDate: string;
+  returnDate: string;
+  airline: string;
+  prices: number[];
+};
+
+const fallbackRoutes: FallbackRoute[] = [
   {
-    id: 1,
-    route: "SFO → HND",
-    origin: "SFO",
-    destination: "HND",
-    departDate: "2026-09-18",
-    returnDate: "2026-10-02",
-    price: 842,
-    currency: "USD",
-    airline: "ANA",
-    bookingUrl: "https://www.google.com/travel/flights",
-    capturedAt: "2026-06-06T11:00:00Z"
+    route: "AVL -> DCA",
+    origin: "AVL",
+    destination: "DCA",
+    departDate: "2026-09-25",
+    returnDate: "2026-09-28",
+    airline: "American",
+    prices: [468, 462, 457, 451, 444, 439, 432]
   },
   {
-    id: 2,
-    route: "JFK → LIS",
-    origin: "JFK",
-    destination: "LIS",
-    departDate: "2026-08-08",
-    returnDate: "2026-08-19",
-    price: 516,
-    currency: "USD",
-    airline: "TAP Air Portugal",
-    bookingUrl: "https://www.google.com/travel/flights",
-    capturedAt: "2026-06-06T11:00:00Z"
+    route: "AVL -> SEA",
+    origin: "AVL",
+    destination: "SEA",
+    departDate: "2026-12-05",
+    returnDate: "2026-12-09",
+    airline: "Delta",
+    prices: [724, 718, 713, 705, 698, 692, 686]
   },
   {
-    id: 3,
-    route: "ORD → CDG",
-    origin: "ORD",
-    destination: "CDG",
-    departDate: "2026-10-11",
-    returnDate: "2026-10-21",
-    price: 624,
-    currency: "USD",
-    airline: "Air France",
-    bookingUrl: "https://www.google.com/travel/flights",
-    capturedAt: "2026-06-06T11:00:00Z"
+    route: "AVL -> PHL",
+    origin: "AVL",
+    destination: "PHL",
+    departDate: "2026-12-18",
+    returnDate: "2026-12-21",
+    airline: "American",
+    prices: [459, 455, 449, 446, 441, 436, 429]
   },
   {
-    id: 4,
-    route: "LAX → MEX",
-    origin: "LAX",
-    destination: "MEX",
-    departDate: "2026-07-16",
-    returnDate: "2026-07-22",
-    price: 288,
-    currency: "USD",
-    airline: "Aeromexico",
-    bookingUrl: "https://www.google.com/travel/flights",
-    capturedAt: "2026-06-06T11:00:00Z"
+    route: "AVL -> CLT",
+    origin: "AVL",
+    destination: "CLT",
+    departDate: "2027-01-01",
+    returnDate: "2027-01-04",
+    airline: "American",
+    prices: [312, 309, 307, 304, 301, 298, 294]
   }
 ];
 
-export const priceTrend = [
-  { date: "May 31", sfoHnd: 1012, jfkLis: 620, ordCdg: 710 },
-  { date: "Jun 1", sfoHnd: 984, jfkLis: 598, ordCdg: 692 },
-  { date: "Jun 2", sfoHnd: 955, jfkLis: 586, ordCdg: 690 },
-  { date: "Jun 3", sfoHnd: 931, jfkLis: 548, ordCdg: 668 },
-  { date: "Jun 4", sfoHnd: 910, jfkLis: 532, ordCdg: 642 },
-  { date: "Jun 5", sfoHnd: 872, jfkLis: 521, ordCdg: 631 },
-  { date: "Jun 6", sfoHnd: 842, jfkLis: 516, ordCdg: 624 }
+const fallbackCapturedAt = [
+  "2026-06-01T11:00:00.000Z",
+  "2026-06-02T11:00:00.000Z",
+  "2026-06-03T11:00:00.000Z",
+  "2026-06-04T11:00:00.000Z",
+  "2026-06-05T11:00:00.000Z",
+  "2026-06-06T11:00:00.000Z",
+  "2026-06-07T11:00:00.000Z"
 ];
 
-export const travelIdeas: TravelIdea[] = [
+export const fallbackFareSnapshots: FareSnapshot[] = fallbackRoutes.flatMap((route, routeIndex) =>
+  fallbackCapturedAt.map((capturedAt, capturedAtIndex) => ({
+    id: routeIndex * fallbackCapturedAt.length + capturedAtIndex + 1,
+    route: route.route,
+    origin: route.origin,
+    destination: route.destination,
+    departDate: route.departDate,
+    returnDate: route.returnDate,
+    price: route.prices[capturedAtIndex],
+    currency: "USD",
+    airline: route.airline,
+    bookingUrl: "https://www.google.com/travel/flights",
+    capturedAt
+  }))
+);
+
+export const fallbackTravelIdeas: TravelIdea[] = [
   {
-    destination: "Kyoto in foliage season",
-    window: "Mid-November 2026",
-    budget: 2200,
-    notes: "Watch SFO/TYO fares and keep rail pass cost in total budget.",
+    destination: "Washington away weekend",
+    window: "September 25-28, 2026",
+    budget: 900,
+    notes: "Track AVL to DCA for the Seahawks road-game itinerary.",
     status: "Tracking"
   },
   {
-    destination: "Lisbon surf week",
-    window: "Late August 2026",
-    budget: 1500,
-    notes: "Prefer nonstop or one-stop routes with morning arrivals.",
-    status: "Ready to book"
+    destination: "Seattle December trip",
+    window: "December 5-9, 2026",
+    budget: 1400,
+    notes: "Watch for one-stop AVL to SEA fares below the route baseline.",
+    status: "Tracking"
   },
   {
-    destination: "Paris museum sprint",
-    window: "October 2026",
-    budget: 1800,
-    notes: "Shoulder-season hotel rates make airfare under $650 attractive.",
+    destination: "Philadelphia holiday window",
+    window: "December 18-21, 2026",
+    budget: 950,
+    notes: "Prefer routings that avoid tight winter connections.",
     status: "Exploring"
   }
 ];
 
-export const alerts: Alert[] = [
+export const fallbackAlerts: Alert[] = [
   {
-    route: "SFO → HND",
-    message: "Fare is 16.8% below the 7-day baseline and cleared the $15 noise filter.",
-    severity: "deal"
-  },
-  {
-    route: "JFK → LIS",
-    message: "Route is below the historical 25th percentile booking-window target.",
-    severity: "urgent"
-  },
-  {
-    route: "ORD → CDG",
-    message: "Three consecutive drops detected; keep monitoring for another 24 hours.",
+    route: "AVL -> DCA",
+    message: "Fallback data is loaded until the worker returns live fare snapshots.",
     severity: "watch"
   }
 ];
