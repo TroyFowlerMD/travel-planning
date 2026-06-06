@@ -3,6 +3,7 @@ main = "apps/worker/src/index.ts"
 account_id = "0cc97ad133a28f1909ff91ee52a02c3e"
 compatibility_date = "2026-06-06"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = true
 
 [triggers]
 crons = ["0 11 * * *"]
