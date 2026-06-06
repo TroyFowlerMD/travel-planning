@@ -13,5 +13,8 @@ binding = "DB"
 database_name = "travel-planning-db"
 database_id = "ddf61ec9-3099-4073-8ed6-279743679928"
 
-[[send_email]]
-name = "EMAIL"
+# TODO: Re-enable after Cloudflare Email Routing is provisioned on this account.
+# Email Routing requires a domain to be added to Cloudflare first; until then the
+# worker treats EMAIL as optional and logs the alert payload instead of sending.
+# [[send_email]]
+# name = "EMAIL"
