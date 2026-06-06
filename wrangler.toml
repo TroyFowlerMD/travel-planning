@@ -1,0 +1,15 @@
+name = "travel-planning-worker"
+main = "apps/worker/src/index.ts"
+compatibility_date = "2026-06-06"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["0 11 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "travel-planning-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[[send_email]]
+name = "EMAIL"
