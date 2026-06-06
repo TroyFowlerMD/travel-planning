@@ -52,6 +52,19 @@ const app = new Hono<{ Bindings: Env }>();
 
 app.use("*", cors({ origin: "*", allowMethods: ["GET", "POST", "OPTIONS"] }));
 
+app.get("/", (c) =>
+  c.json({
+    service: "travel-planning-worker",
+    status: "ok",
+    docs: "https://github.com/TroyFowlerMD/travel-planning",
+    endpoints: {
+      health: "GET /health",
+      snapshots: "GET /api/fare-snapshots",
+      refresh: "POST /api/refresh"
+    }
+  })
+);
+
 app.get("/health", (c) => c.json({ ok: true, service: "travel-planning-worker" }));
 
 app.get("/api/fare-snapshots", async (c) => {
@@ -110,10 +123,14 @@ function getTrackedRoutes(env: Env): TrackedRoute[] {
     return parsed.filter((route) => route.origin && route.destination && route.departDate);
   }
 
+  // Seahawks away-game travel itinerary out of AVL (Asheville).
+  // Baselines are placeholder anchors for the drop-percent alert math; tune
+  // them after the first few weeks of real snapshots establish actual norms.
   return [
-    { origin: "SFO", destination: "HND", departDate: "2026-09-18", returnDate: "2026-10-02", currency: "USD", baselinePrice: 1000 },
-    { origin: "JFK", destination: "LIS", departDate: "2026-08-08", returnDate: "2026-08-19", currency: "USD", baselinePrice: 600 },
-    { origin: "ORD", destination: "CDG", departDate: "2026-10-11", returnDate: "2026-10-21", currency: "USD", baselinePrice: 700 }
+    { origin: "AVL", destination: "DCA", departDate: "2026-09-25", returnDate: "2026-09-28", currency: "USD", baselinePrice: 450 },
+    { origin: "AVL", destination: "SEA", departDate: "2026-12-05", returnDate: "2026-12-09", currency: "USD", baselinePrice: 700 },
+    { origin: "AVL", destination: "PHL", departDate: "2026-12-18", returnDate: "2026-12-21", currency: "USD", baselinePrice: 450 },
+    { origin: "AVL", destination: "CLT", departDate: "2027-01-01", returnDate: "2027-01-04", currency: "USD", baselinePrice: 300 }
   ];
 }
 
