@@ -1,0 +1,23 @@
+{
+  "name": "travel-planning",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/worker",
+    "packages/db"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w @travel-planning/web",
+    "dev:worker": "npm run dev -w @travel-planning/worker",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:local": "wrangler d1 execute travel-planning-db --local --file=packages/db/schema.sql",
+    "db:remote": "wrangler d1 execute travel-planning-db --remote --file=packages/db/schema.sql"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "wrangler": "^3.114.14"
+  }
+}
