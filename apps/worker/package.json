@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev ../../wrangler.toml --local",
-    "deploy": "wrangler deploy ../../wrangler.toml",
+            "deploy": "wrangler deploy --config ../../wrangler.toml",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
