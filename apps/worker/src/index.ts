@@ -92,21 +92,29 @@ async function refreshAllRoutes(env: Env, scheduledTime = Date.now()) {
   const routes = getTrackedRoutes(env);
   const capturedAt = new Date(scheduledTime).toISOString();
   const snapshots: FareSnapshot[] = [];
+  const failures: Array<{ route: string; error: string }> = [];
   const alerts: Array<{ snapshot: FareSnapshot; averagePrice: number; dropPercent: number }> = [];
 
   for (const route of routes) {
-    const snapshot = await fetchFareSnapshot(env, route, capturedAt);
-    const averagePrice = await getSevenDayAverage(env.DB, snapshot.route);
-    snapshots.push(snapshot);
-    await insertFareSnapshot(env.DB, snapshot);
-    if (averagePrice > 0) {
-      const dropAmount = averagePrice - snapshot.price;
-      const dropPercent = dropAmount / averagePrice;
-      if (dropPercent >= 0.1 && dropAmount >= 15) {
-        alerts.push({ snapshot, averagePrice, dropPercent });
+    const routeLabel = `${route.origin} → ${route.destination}`;
+    try {
+      const snapshot = await fetchFareSnapshot(env, route, capturedAt);
+      const averagePrice = await getSevenDayAverage(env.DB, snapshot.route);
+      snapshots.push(snapshot);
+      await insertFareSnapshot(env.DB, snapshot);
+      if (averagePrice > 0) {
+        const dropAmount = averagePrice - snapshot.price;
+        const dropPercent = dropAmount / averagePrice;
+        if (dropPercent >= 0.1 && dropAmount >= 15) {
+          alerts.push({ snapshot, averagePrice, dropPercent });
+        }
+      } else if (route.baselinePrice && route.baselinePrice - snapshot.price >= 15 && (route.baselinePrice - snapshot.price) / route.baselinePrice >= 0.1) {
+        alerts.push({ snapshot, averagePrice: route.baselinePrice, dropPercent: (route.baselinePrice - snapshot.price) / route.baselinePrice });
       }
-    } else if (route.baselinePrice && route.baselinePrice - snapshot.price >= 15 && (route.baselinePrice - snapshot.price) / route.baselinePrice >= 0.1) {
-      alerts.push({ snapshot, averagePrice: route.baselinePrice, dropPercent: (route.baselinePrice - snapshot.price) / route.baselinePrice });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`[refresh] Route ${routeLabel} failed: ${message}`);
+      failures.push({ route: routeLabel, error: message });
     }
   }
 
@@ -114,7 +122,14 @@ async function refreshAllRoutes(env: Env, scheduledTime = Date.now()) {
     await sendAlertDigest(env, alerts);
   }
 
-  return { capturedAt, refreshed: snapshots.length, alerts: alerts.length, routes: snapshots.map((snapshot) => snapshot.route) };
+  return {
+    capturedAt,
+    refreshed: snapshots.length,
+    failed: failures.length,
+    alerts: alerts.length,
+    routes: snapshots.map((snapshot) => snapshot.route),
+    failures
+  };
 }
 
 function getTrackedRoutes(env: Env): TrackedRoute[] {
