@@ -12,6 +12,8 @@ type Env = {
   TRACKED_ROUTES?: string;
 };
 
+type RouteMode = "flight" | "drive";
+
 type TrackedRoute = {
   origin: string;
   destination: string;
@@ -19,6 +21,9 @@ type TrackedRoute = {
   returnDate?: string;
   currency?: string;
   baselinePrice?: number;
+  // Routes flagged as "drive" are listed for itinerary completeness but are
+  // skipped by the fare-refresh loop. Default behavior (undefined) is flight.
+  mode?: RouteMode;
 };
 
 type FareSnapshot = {
@@ -97,6 +102,10 @@ async function refreshAllRoutes(env: Env, scheduledTime = Date.now()) {
 
   for (const route of routes) {
     const routeLabel = `${route.origin} → ${route.destination}`;
+    if (route.mode === "drive") {
+      console.log(`[refresh] Skipping ${routeLabel} (mode=drive)`);
+      continue;
+    }
     try {
       const snapshot = await fetchFareSnapshot(env, route, capturedAt);
       const averagePrice = await getSevenDayAverage(env.DB, snapshot.route);
@@ -145,7 +154,9 @@ function getTrackedRoutes(env: Env): TrackedRoute[] {
     { origin: "AVL", destination: "DCA", departDate: "2026-09-25", returnDate: "2026-09-28", currency: "USD", baselinePrice: 450 },
     { origin: "AVL", destination: "SEA", departDate: "2026-12-05", returnDate: "2026-12-09", currency: "USD", baselinePrice: 700 },
     { origin: "AVL", destination: "PHL", departDate: "2026-12-18", returnDate: "2026-12-21", currency: "USD", baselinePrice: 450 },
-    { origin: "AVL", destination: "CLT", departDate: "2027-01-01", returnDate: "2027-01-04", currency: "USD", baselinePrice: 300 }
+    // AVL→CLT is a ~2 hr drive; kept for itinerary modeling but excluded from
+    // the fare-refresh loop so it doesn't pollute averages or alerts.
+    { origin: "AVL", destination: "CLT", departDate: "2027-01-01", returnDate: "2027-01-04", currency: "USD", baselinePrice: 300, mode: "drive" }
   ];
 }
 
