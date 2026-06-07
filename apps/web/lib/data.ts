@@ -76,15 +76,29 @@ const fallbackRoutes: FallbackRoute[] = [
     returnDate: "2026-12-21",
     airline: "American",
     prices: [459, 455, 449, 446, 441, 436, 429]
-  },
+  }
+  // AVL -> CLT is a ~2 hr drive and is now flagged mode="drive" in the worker,
+  // so it's excluded from fare-refresh and from the dashboard's fare stats.
+];
+
+export type DriveRoute = {
+  route: string;
+  origin: string;
+  destination: string;
+  departDate: string;
+  returnDate: string;
+  note: string;
+};
+
+// Itinerary legs handled by car, surfaced separately from fare tracking.
+export const driveRoutes: DriveRoute[] = [
   {
     route: "AVL -> CLT",
     origin: "AVL",
     destination: "CLT",
     departDate: "2027-01-01",
     returnDate: "2027-01-04",
-    airline: "American",
-    prices: [312, 309, 307, 304, 301, 298, 294]
+    note: "~2 hr drive; faster and cheaper than flying for this leg."
   }
 ];
 
