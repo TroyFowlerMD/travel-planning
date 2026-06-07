@@ -77,13 +77,13 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Create Pages project (idempotent)
-        run: npx wrangler pages project create travel-planning --production-branch=main || true
+        run: npx wrangler pages project create troymd-travel --production-branch=main || true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Pages
-        run: npx wrangler pages deploy apps/web/out --project-name=travel-planning --branch=main
+        run: npx wrangler pages deploy apps/web/out --project-name=troymd-travel --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
