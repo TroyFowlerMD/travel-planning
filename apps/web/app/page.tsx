@@ -95,7 +95,7 @@ export default function DashboardPage() {
     [dashboard.snapshots, currentSnapshots, dashboard.source]
   );
 
-  const bestFare = currentSnapshots.reduce((best, fare) => (fare.price < best.price ? fare : best), currentSnapshots[0]);
+  const bestFare = currentSnapshots.length     ? currentSnapshots.reduce((best, fare) => (fare.price < best.price ? fare : best), currentSnapshots[0])     : null;
   const averageFare = Math.round(currentSnapshots.reduce((sum, fare) => sum + fare.price, 0) / currentSnapshots.length);
   const latestCapturedAt = currentSnapshots[0]?.capturedAt;
   const dataSourceLabel = dashboard.source === "worker" ? "Worker data" : "Fallback data";
@@ -118,9 +118,9 @@ export default function DashboardPage() {
           </div>
           <div className="grid gap-3 rounded-3xl bg-white/10 p-5 ring-1 ring-white/15">
             <span className="text-sm uppercase tracking-[0.25em] text-cyan-100">Best fare today</span>
-            <strong className="text-5xl">${bestFare.price}</strong>
+            <strong className="text-5xl">{bestFare ? `$${bestFare.price}` : "N/A"}</strong>
             <span className="text-slate-300">
-              {bestFare.route} with {bestFare.airline}
+              {bestFare ? `${bestFare.route} with ${bestFare.airline}` : "No fare data available"}
             </span>
           </div>
         </div>
