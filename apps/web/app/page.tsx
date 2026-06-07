@@ -96,7 +96,9 @@ export default function DashboardPage() {
   );
 
   const bestFare = currentSnapshots.length     ? currentSnapshots.reduce((best, fare) => (fare.price < best.price ? fare : best), currentSnapshots[0])     : null;
-  const averageFare = Math.round(currentSnapshots.reduce((sum, fare) => sum + fare.price, 0) / currentSnapshots.length);
+  const averageFare = currentSnapshots.length
+    ? Math.round(currentSnapshots.reduce((sum, fare) => sum + fare.price, 0) / currentSnapshots.length)
+    : null;
   const latestCapturedAt = currentSnapshots[0]?.capturedAt;
   const dataSourceLabel = dashboard.source === "worker" ? "Worker data" : "Fallback data";
 
@@ -129,7 +131,7 @@ export default function DashboardPage() {
       <section className="grid gap-4 md:grid-cols-4">
         {[
           ["Tracked routes", currentSnapshots.length.toString()],
-          ["Average fare", `$${averageFare}`],
+          ["Average fare", averageFare !== null ? `$${averageFare}` : "N/A"],
           ["Active alerts", alerts.length.toString()],
           ["Ideas captured", fallbackTravelIdeas.length.toString()]
         ].map(([label, value]) => (
